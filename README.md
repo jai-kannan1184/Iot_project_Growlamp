@@ -35,7 +35,7 @@ brew install ccache
 Run the following commands in your terminal of choice
 
 ```bash
-cd ~/esp
+take ~/esp # if you don't have zsh:		mkdir ~/esp && cd ~/esp
 git clone -b v4.0-beta1 --recursive https://github.com/espressif/esp-idf.git
 ```
 
@@ -56,7 +56,7 @@ cd ~/esp/esp-idf
 
 The `hello-world` directory in this repo contains an `.envrc` file which configures all environment variables via [direnv](https://direnv.net).
 
-**NOTE:** You may need to update the `ESPPORT` env var in the `.envrc` file but at the time of writing this document the variable is correct for macOS. See the [official docs](https://docs.espressif.com/projects/esp-idf/en/v4.0-beta1/get-started/index.html#get-started-connect) for the serial port patterns for other Operating Systems.
+**NOTE:** You may need to update the `ESPPORT` env var in the `.envrc` file but at the time of writing this document the variable is correct for macOS and the ESP32-PICO-KIT device. See the [official docs](https://docs.espressif.com/projects/esp-idf/en/v4.0-beta1/get-started/index.html#get-started-connect) for the serial port patterns for other Operating Systems.
 
 #### Env vars without direnv
 
@@ -66,7 +66,7 @@ The previous installation step does not include adding/changing any environment 
 . ~/esp/esp-idf/export.sh
 ```
 
-**NOTE:** You will also need to set the `ESPPORT` env var to match the board's serial port, as the default used by the tools is the Linux port. At the time of writing this document the port on macOS is `/dev/cu.SLAB_USBtoUART`. See the [official docs](https://docs.espressif.com/projects/esp-idf/en/v4.0-beta1/get-started/index.html#get-started-connect) for the serial port patterns for other Operating Systems.
+**NOTE:** You will also need to set the `ESPPORT` env var to match the board's serial port, as the default used by the tools is the Linux port. See the [official docs](https://docs.espressif.com/projects/esp-idf/en/v4.0-beta1/get-started/index.html#get-started-connect) for the serial port patterns for other Operating Systems.
 
 ### Test installation
 
