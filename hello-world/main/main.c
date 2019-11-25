@@ -1,31 +1,66 @@
-#include <stdio.h>
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "freertos/queue.h"
+#include "state_machine.h"
+#include "esp_event_loop.h"
+#include "states.h"
+#include <driver/gpio.h>
+#include<stdlib.h>
+#include<driver/i2c.h>
+#include "unistd.h"
 
-void app_main(void)
-{
-    printf("Hello world!\n");
-
-    /* Print chip information */
-    esp_chip_info_t chip_info;
-    esp_chip_info(&chip_info);
-    printf("This is ESP32 chip with %d CPU cores, WiFi%s%s, ",
-            chip_info.cores,
-            (chip_info.features & CHIP_FEATURE_BT) ? "/BT" : "",
-            (chip_info.features & CHIP_FEATURE_BLE) ? "/BLE" : "");
-
-    printf("silicon revision %d, ", chip_info.revision);
-
-    printf("%dMB %s flash\n", spi_flash_get_chip_size() / (1024 * 1024),
-            (chip_info.features & CHIP_FEATURE_EMB_FLASH) ? "embedded" : "external");
-
-    for (int i = 10; i >= 0; i--) {
-        printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-    printf("Restarting now.\n");
-    fflush(stdout);
-    esp_restart();
+#define TAG "main.c"
+#define ESP_INTR_FLAG_DEFAULT 0
+static QueueHandle_t eventQueue;
+void stateMachineTask(void *pvParameters) {
+   ESP_LOGI(TAG, "State machine started");
+   createDeviceState();
+   int event = 1;
+   for (;;) {
+       if (xQueueReceive(eventQueue, &event, portMAX_DELAY)) {
+           ESP_LOGI(TAG, "Event received");
+           if (event == 1) {
+             triggerEvent();
+           }
+           if (event == 2) {
+             //wifi
+           }
+       }
+   }
+   vTaskDelete(NULL);
+}
+void IRAM_ATTR buttonHandler(void* arg) {
+  int event = 1;
+   xQueueSendFromISR(eventQueue, &event, NULL);
+}
+void IRAM_ATTR wifiHandler(void* arg) {
+  int event = 2;
+   xQueueSendFromISR(eventQueue, &event, NULL);
+}
+void initialiseHardware(xQueueHandle* events) {
+  ESP_LOGI(TAG, "Initialising hardware");
+  eventQueue = *events;
+  gpio_config_t ioConfig;
+  ioConfig.intr_type = GPIO_PIN_INTR_DISABLE;
+  ioConfig.pin_bit_mask = 1 << 26 | 1 << 27;
+  ioConfig.mode = GPIO_MODE_INPUT_OUTPUT;
+  ioConfig.pull_down_en = 0;
+  ioConfig.pull_up_en = 0;
+  gpio_config(&ioConfig);
+  ioConfig.intr_type = GPIO_PIN_INTR_NEGEDGE;
+  ioConfig.pin_bit_mask = 1 << 21;
+  ioConfig.mode = GPIO_MODE_INPUT;
+  ioConfig.pull_down_en = 1;
+  ioConfig.pull_up_en = 0;
+  gpio_config(&ioConfig);
+  gpio_install_isr_service(ESP_INTR_FLAG_DEFAULT);
+  gpio_isr_handler_add(21, buttonHandler, (void*) 21);
+  gpio_isr_handler_add(22, wifiHandler, (void*) 22);
+}
+void app_main() {
+  ESP_LOGI(TAG, "App main has started");
+  eventQueue = xQueueCreate(10, sizeof(int));
+  xTaskCreate(&stateMachineTask, "State Machine", 1024 * 5, NULL, 1, NULL);
+  initialiseHardware(&eventQueue);
 }
