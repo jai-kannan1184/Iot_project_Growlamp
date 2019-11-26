@@ -2,6 +2,8 @@
 #include "esp_log.h"
 #include "driver/i2c.h"
 #include "unistd.h"
+
+//defines for bus
 #define TAG "i2c_bus"
 
 //defines 
@@ -22,14 +24,13 @@ double tempSensor(){
     I2C_MASTER_ACK);
 
     i2c_master_write_byte(handle,
-    SI_7021_MEASURE_TEMPERATURE,
-    I2C_MASTER_ACK);
+    SI_7021_MEASURE_TEMPERATURE, I2C_MASTER_ACK);
 
     i2c_master_stop(handle);
         esp_err_t error = i2c_master_cmd_begin(I2C_NUM_0, handle, SI_7021_TIMEOUT);
     i2c_cmd_link_delete(handle);
     if(error != ESP_OK){
-        ESP_LOGI(TAG,"Failed to write Temperature commdand: %s ", esp_err_to_name(error));
+        ESP_LOGI(TAG,"Failed to write Temperature command: %s ", esp_err_to_name(error));
     }
     uint8_t tempMSB;
     uint8_t tempLSB;
