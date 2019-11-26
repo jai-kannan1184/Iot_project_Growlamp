@@ -9,6 +9,7 @@
 #include<stdlib.h>
 #include<driver/i2c.h>
 #include "unistd.h"
+#include "temperature_sensor.h"
 
 //defines
 
@@ -29,6 +30,9 @@ void stateMachineTask(void *pvParameters) {
            if (event == 1) {
              triggerEvent();
              sleep(1);
+             double cTemp;
+             sleep(1);
+             cTemp = tempSensor();
            }
            if (event == 2) {
              //wifi
@@ -92,4 +96,6 @@ void app_main() {
   eventQueue = xQueueCreate(10, sizeof(int));
   xTaskCreate(&stateMachineTask, "State Machine", 1024 * 5, NULL, 1, NULL);
   initialiseHardware(&eventQueue);
+  //call for temperature sensor
+  
 }

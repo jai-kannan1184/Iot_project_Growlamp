@@ -1,0 +1,2 @@
+double tempSensor();
+float cTemp;
