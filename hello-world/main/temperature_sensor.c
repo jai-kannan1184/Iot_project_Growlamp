@@ -54,6 +54,6 @@ double tempSensor(){
     cTemp *= 175.72;
     cTemp /= 65536;
     cTemp -= 46.85;
-    ESP_LOGI(TAG, "Temperature is : %2f C", cTemp);
+    ESP_LOGI(TAG, "Temperature is : %.2f C", cTemp);
     return cTemp; 
 }    
