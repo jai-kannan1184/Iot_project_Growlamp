@@ -96,6 +96,28 @@ void app_main() {
   eventQueue = xQueueCreate(10, sizeof(int));
   xTaskCreate(&stateMachineTask, "State Machine", 1024 * 5, NULL, 1, NULL);
   initialiseHardware(&eventQueue);
-  //call for temperature sensor
+  // Start config and initialise I2C bus
+  i2c_config_t config;
+
+  config.sda_io_num = 4;
+  config.sda_pullup_en = GPIO_PULLUP_ENABLE;
+  config.scl_io_num = 14;
+  config.scl_pullup_en = GPIO_PULLUP_ENABLE;
+  config.mode = I2C_MODE_MASTER;
+  config.master.clk_speed = 100000;
+
+  esp_err_t error = i2c_param_config(I2C_NUM_0, &config);
+  if(error != ESP_OK){
+    ESP_LOGI(TAG, "Failed to configure shared I2C bus: %s", esp_err_to_name(error));
+    return;
+  }
+  error = i2c_set_timeout(I2C_NUM_0, 100000);
+  if(error != ESP_OK){
+    ESP_LOGI(TAG, "Failed to set timeout for I2C bus: %s", esp_err_to_name(error));
+  }
+  error = i2c_driver_install(I2C_NUM_0, config.mode, 512,512,0);
+  if(error != ESP_OK){
+    ESP_LOGI(TAG, "Failed to install driver for the I2C bus: %s", esp_err_to_name(error));
+  }
   
 }
