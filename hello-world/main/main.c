@@ -10,6 +10,7 @@
 #include<driver/i2c.h>
 #include "unistd.h"
 #include "temperature_sensor.h"
+#include "humidity_sensor.h"
 
 //defines
 
@@ -30,9 +31,10 @@ void stateMachineTask(void *pvParameters) {
            if (event == 1) {
              triggerEvent();
              sleep(1);
-             double cTemp;
+             double cTemp, humidity;
              sleep(1);
              cTemp = tempSensor();
+             humidity = humiditySensor(); 
            }
            if (event == 2) {
              //wifi
