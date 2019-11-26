@@ -22,5 +22,38 @@ double humiditySensor(){
     i2c_master_write_byte(handle, 
     SI_7021_ADDRESS << 1 | I2C_MASTER_WRITE, I2C_MASTER_ACK);
 
-    
+    i2c_master_write_byte(handle,
+    SI_7021_MEASURE_HUMIDITY, I2C_MASTER_ACK);
+
+    i2c_master_stop(handle);
+        esp_err_t error = i2c_master_cmd_begin(I2C_NUM_0, handle, SI_7021_TIMEOUT);
+    i2c_cmd_link_delete(handle);
+
+    if(error != ESP_OK){
+        ESP_LOGI(TAG, "Failed to write humidity command: %s", esp_err_to_name(error));
+    }
+    uint8_t humMSB;
+    uint8_t humLSB;
+    handle = i2c_cmd_link_create();
+    i2c_master_start(handle);
+    //bus read write
+    i2c_master_write_byte(handle, 
+    SI_7021_ADDRESS << 1 | I2C_MASTER_READ, I2C_MASTER_ACK);
+    sleep(1);
+    i2c_master_read_byte(handle, &humMSB, I2C_MASTER_ACK);
+    i2c_master_read_byte(handle, &humLSB, I2C_MASTER_LAST_NACK);
+
+    i2c_master_stop(handle);
+    error = i2c_master_cmd_begin(I2C_NUM_0, handle, SI_7021_TIMEOUT);
+    i2c_cmd_link_delete(handle);
+    if(error != ESP_OK){
+        ESP_LOGI(TAG,"Failer to read humidity: %s", esp_err_to_name(error));
+    }
+    //Humidity calculation
+    double humidity = ((uint16_t)humMSB << 8) | (uint16_t)humLSB;
+    humidity *= 125;
+    humidity /= 65536;
+    humidity -= 6;
+    ESP_LOGI(TAG,"Humidity is: %.2f", humidity);
+    return humidity;
 }
