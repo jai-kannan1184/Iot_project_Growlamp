@@ -11,6 +11,7 @@
 #include "unistd.h"
 #include "temperature_sensor.h"
 #include "humidity_sensor.h"
+#include "rgb_led_driver.h"
 
 //defines
 
@@ -32,9 +33,26 @@ void stateMachineTask(void *pvParameters) {
              triggerEvent();
              sleep(1);
              double cTemp, humidity;
-             sleep(1);
              cTemp = tempSensor();
              humidity = humiditySensor(); 
+             if(humidity < 45){
+               setFirstColour(GREEN);
+               if(humidity==45){
+                 setFirstColour(YELLOW);
+                }
+             }
+             else{
+               setFirstColour(ORANGE);
+             }
+            if(cTemp <=25){
+              setSecondColour(BLUE);
+              if(cTemp >= 26 && cTemp <=27){
+                setSecondColour(YELLOW);
+              }
+            } 
+            else{
+              setSecondColour(RED);
+            }
            }
            if (event == 2) {
              //wifi
@@ -98,6 +116,7 @@ void app_main() {
   eventQueue = xQueueCreate(10, sizeof(int));
   xTaskCreate(&stateMachineTask, "State Machine", 1024 * 5, NULL, 1, NULL);
   initialiseHardware(&eventQueue);
+  initialiseRgbLeds();
   // Start config and initialise I2C bus
   i2c_config_t config;
 
