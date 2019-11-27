@@ -1,9 +1,8 @@
-#ifndef RGB_LED_INTERFACE
+#ifndef RGB_LED_INTERFACE   
 #define RGB_LED_INTERFACE
 
 #include "freertos/FreeRTOS.h"
 
-//SPI bus pins
 #define PIN_NUM_MOSI 23
 #define PIN_NUM_CLOCK 18
 
